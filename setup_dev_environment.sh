@@ -177,11 +177,27 @@ install_dev_tools() {
         curl \
         wget \
         build-essential \
-        vim \
         htop \
         tree \
         unzip \
         zip
+    
+    # Install vim (try different package names)
+    if ! command_exists vim; then
+        print_status "Installing vim..."
+        if sudo apt install -y vim 2>/dev/null; then
+            print_success "vim installed successfully"
+        elif sudo apt install -y vim-tiny 2>/dev/null; then
+            print_success "vim-tiny installed successfully"
+        elif sudo apt install -y vim-nox 2>/dev/null; then
+            print_success "vim-nox installed successfully"
+        else
+            print_warning "Could not install vim. You may need to install it manually."
+        fi
+    else
+        print_warning "vim is already installed:"
+        vim --version | head -1
+    fi
     
     print_success "Additional development tools installed"
 }
@@ -239,6 +255,19 @@ verify_installations() {
     else
         print_error "✗ Docker is not installed"
     fi
+    
+    echo ""
+    print_status "=== Additional Development Tools ==="
+    
+    # Check additional tools
+    local tools=("curl" "wget" "vim" "htop" "tree" "unzip" "zip")
+    for tool in "${tools[@]}"; do
+        if command_exists "$tool"; then
+            print_success "✓ $tool is installed"
+        else
+            print_warning "⚠ $tool is not installed"
+        fi
+    done
     
     echo ""
     print_status "=== Setup Complete ==="
